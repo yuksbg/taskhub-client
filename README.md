@@ -41,10 +41,23 @@ go run ./examples/worker
 
 # Producer terminal
 go run ./examples/producer -id addition-001 -a 5 -b 7
+```
+
+## Schedule tasks for later
+
+Pass a future RFC 3339 timestamp with a time zone offset or `Z`. With a combined credential, this schedules all four tasks for the same time and keeps the worker connected.
+
+```sh
+go run ./examples/channels -queue linux-builds -concurrency 2 -count 4 -id later-batch-001 -run-at 2030-06-15T09:30:00+03:00
+```
+
+With a producer credential, this schedules one task and exits after TaskHub accepts it.
+
+```sh
 go run ./examples/producer -id addition-002 -run-at 2030-06-15T09:30:00+03:00
 ```
 
-A scheduled submission needs a future RFC 3339 timestamp. It becomes eligible at that time and waits for an eligible worker.
+In Go code, set `Submission.ScheduledAt` to the desired `time.Time`. TaskHub accepts the submission immediately, then makes it eligible for execution at the requested time. If no eligible worker is connected, the task waits.
 
 ## Install in your Go project
 

@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/yuksbg/taskhub-client"
 )
@@ -20,6 +21,7 @@ func main() {
 	concurrency := flag.Int("concurrency", 2, "maximum concurrent deliveries (1–32)")
 	count := flag.Int("count", 4, "number of example tasks to submit")
 	id := flag.String("id", "", "stable request ID prefix")
+	runAt := flag.String("run-at", "", "optional future RFC 3339 timestamp for the batch")
 	flag.Parse()
 	if *id == "" {
 		log.Fatal("pass -id with a stable request ID prefix")
@@ -27,13 +29,21 @@ func main() {
 	if *count < 1 {
 		log.Fatal("pass -count with a positive number")
 	}
+	scheduledAt := time.Time{}
+	if *runAt != "" {
+		when, err := time.Parse(time.RFC3339Nano, *runAt)
+		if err != nil {
+			log.Fatal("pass -run-at in RFC 3339 format")
+		}
+		scheduledAt = when
+	}
 	cfg := taskhub.Config{URL: *url, Token: os.Getenv("TASKHUB_TOKEN"), Queue: *queue, Concurrency: *concurrency}
-	if err := run(cfg, *id, *count); err != nil {
+	if err := run(cfg, *id, *count, scheduledAt); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func run(cfg taskhub.Config, id string, count int) error {
+func run(cfg taskhub.Config, id string, count int, scheduledAt time.Time) error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	channels, err := taskhub.Default.Start(ctx, cfg)
@@ -79,7 +89,8 @@ func run(cfg taskhub.Config, id string, count int) error {
 		if submit != nil {
 			request = taskhub.Submission{
 				Queue: cfg.Queue, RequestID: fmt.Sprintf("%s-%d", id, index),
-				Payload: map[string]any{"a": index, "b": 3},
+				Payload:     map[string]any{"a": index, "b": 3},
+				ScheduledAt: scheduledAt,
 			}
 		}
 		select {
