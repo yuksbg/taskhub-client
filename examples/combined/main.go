@@ -10,7 +10,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"taskhub_client"
+	"github.com/yuksbg/taskhub-client"
 )
 
 func main() {

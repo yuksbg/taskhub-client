@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	"taskhub_client"
+	"github.com/yuksbg/taskhub-client"
 )
 
 func main() {

@@ -1,4 +1,4 @@
-module taskhub_client
+module github.com/yuksbg/taskhub-client
 
 go 1.23.0
 

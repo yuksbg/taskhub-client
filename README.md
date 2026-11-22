@@ -6,9 +6,11 @@ Submit immediate or scheduled tasks and process deliveries through the TaskHub v
 
 1. In TaskHub, create or select an enabled, unpaused queue. The examples default to the queue slug `linux-builds`.
 2. Register a **Worker and producer** credential. Grant it access to the queue, match the queue’s exact capability set, and allow at least two worker slots.
-3. Set `TASKHUB_TOKEN` in your shell to that credential’s token, then run this from the client directory.
+3. Set `TASKHUB_TOKEN` in your shell to that credential’s token, then clone the repository and run the example.
 
 ```sh
+git clone https://github.com/yuksbg/taskhub-client.git
+cd taskhub-client
 go run ./examples/channels -queue linux-builds -concurrency 2 -count 4 -id demo-001
 ```
 
@@ -44,16 +46,19 @@ go run ./examples/producer -id addition-002 -run-at 2030-06-15T09:30:00+03:00
 
 A scheduled submission needs a future RFC 3339 timestamp. It becomes eligible at that time and waits for an eligible worker.
 
-## Import from another Go module
+## Install in your Go project
 
-This checkout uses the local module name `taskhub_client` and the Go package name `taskhub`. From your application module, point Go at your checkout.
+From your application module, add the dependency.
 
 ```sh
-go mod edit -require=taskhub_client@v0.0.0
-go mod edit -replace=taskhub_client=/absolute/path/to/taskhub_client
+go get github.com/yuksbg/taskhub-client@latest
 ```
 
-Use `import "taskhub_client"` in your code, then run `go mod tidy`.
+Import it as `github.com/yuksbg/taskhub-client`. The package name is `taskhub`.
+
+```go
+import "github.com/yuksbg/taskhub-client"
+```
 
 ## Use the channel client
 
